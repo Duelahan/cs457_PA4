@@ -6,7 +6,6 @@
 #File: File for the table methods
 
 #libraries
-from ntpath import join
 import sys
 import os
 import helper_methods as helper

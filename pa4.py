@@ -26,7 +26,7 @@ def parser(tokens):
     #these are tokens that start a query, each function performs the
     #   action specified by the user
     query_start = {"use": use_db, "create": create, "drop": drop, "select": select,
-        "alter": alter_tb, "insert": insert_record, "delete": delete, "update": update}
+        "alter": alter_tb, "insert": insert_record, "delete": delete, "update": update, "begin": transaction, "commit": commit_transaction}
     #perform the operation if it exists, otherwise inform the user
     try:
         query_start[tokens[0].lower()](tokens[1:])
@@ -127,6 +127,19 @@ def delete(tokens):
 def update(tokens):
     my_db_sys.update_table(tokens[0], tokens[2:])
 
+def transaction(tokens):
+    #initialize the transaction
+    if(tokens[0].lower() == "transaction"):
+        my_db_sys.init_transaction()
+    print("Transaction starts.")
+
+def commit_transaction():
+    if(my_db_sys.has_manager()):
+        #commit the transaction
+        my_db_sys.end_transaction()
+        print("Transaction committed.")
+    else:
+        print("Nothing to Commit.")
 
 def main(): 
     
@@ -180,12 +193,10 @@ def main():
                             if(tokens[0].lower() == ".exit"):
                                 exit = True
                             #avoids processing comments and empty lines in a file or in user input
-                            elif(not(len(tokens) == 1)):
+                            else:
                                 prev_command = True
                                 #parse string and perform specified operations
                                 parser(tokens)
-                            else:
-                                print("Single input string is invalid query.")
                         except:
                             #no command if this line is empty
                             prev_command = False
