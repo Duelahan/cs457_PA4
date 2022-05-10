@@ -1,0 +1,4 @@
+seat ; status ; 
+int ; int ; 
+22 ; 1 ; 
+23 ; 1 ; 

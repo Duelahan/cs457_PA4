@@ -133,7 +133,7 @@ def transaction(tokens):
         my_db_sys.init_transaction()
     print("Transaction starts.")
 
-def commit_transaction():
+def commit_transaction(tokens):
     if(my_db_sys.has_manager()):
         #commit the transaction
         my_db_sys.end_transaction()

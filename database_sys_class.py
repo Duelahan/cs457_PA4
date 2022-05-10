@@ -180,7 +180,6 @@ class database_sys:
         values_to_set = tokens[:index]
         #get relational args right of 'where'
         relational_args = tokens[index+1:]
-        
         #default for PA1 - PA3
         if(self.db_transaction_manager == None):
             #load the table into memory
@@ -204,6 +203,7 @@ class database_sys:
                 print(str(len(indexes_that_contain)) + " records modified.")
         #transactional mode
         else:
+
             #check if the transaction manager already reserved the table
             if(database_sys.db_transaction_manager.has_table(database_sys.database_in_use, table_name)):
                 pass
@@ -212,36 +212,38 @@ class database_sys:
                 database_sys.db_transaction_manager.lock(database_sys.database_in_use, table_name)
                 #*** program gets here and then has exception
             except Exception as err:
-                if(err == "Already Locked"):
+                if(str(err) == "Already Locked"):
                     print("Error: Table " + str(table_name) + " is locked!")
                     #abort the entire transaction
                     database_sys.db_transaction_manager.abort()
                     #reset the transaction manager
                     database_sys.db_transaction_manager = None
-                    print("Transaction committed.")
+                    print("Transaction abort.")
                 else:
                     print("Existential Error")
                 return
-            print("yeeT")
+
             #now that lock was obtained, update the temp table
             #load the table into memory
             some_table = TB.load_table(database_sys.database_in_use, table_name)
             #check table loaded
-            print("YEET")
             if(some_table == []):
                 return
 
-            print("hiiiiiiii")
             #make a list of tuple indexes that have the desired attributes
             indexes_that_contain = TB.index_list_generator(some_table, relational_args)
-            print("tttt")
+
             #update the records in the table in memory
             TB.update_records(some_table, indexes_that_contain, values_to_set)
 
-            print("yeet")
-
             for index in indexes_that_contain:
                 database_sys.db_transaction_manager.add_update(database_sys.database_in_use, table_name, index, some_table[index])
+
+            #some print/returns
+            if(len(indexes_that_contain) == 1):
+                print("1 record modified.")
+            else:
+                print(str(len(indexes_that_contain)) + " records modified.")
 
     #initializes the start of a transaction
     def init_transaction(self):

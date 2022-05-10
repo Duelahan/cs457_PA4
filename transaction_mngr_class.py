@@ -4,7 +4,8 @@ import table_methods as TB
 class transaction_mngr:
     separator = " ; "
     def __init__(self, database_name):
-        reserved_tables = set()
+        self.reserved_tables = set()
+        self.aborted = False
         #initialize a file that stores all table locks
         if not os.path.exists("databases/"+ database_name.lower() + "/locks"):
             os.mkdir("databases/" + database_name.lower() + "/locks")
@@ -17,8 +18,13 @@ class transaction_mngr:
         else:
             return False
 
+    def was_aborted(self):
+        temp = self.aborted
+        self.aborted = False
+        return temp
+
     def has_table(self, database_name, table_name):
-        return (database_name, table_name) in self.reserved_tables()
+        return ((database_name.lower(), table_name.lower()) in self.reserved_tables)
 
     #lockes the desired table, if its unlocked, o.w. it throws an error
     def lock(self, database_name, table_name):
@@ -48,7 +54,7 @@ class transaction_mngr:
             for element in record:
                 temp += str(element)
                 temp += transaction_mngr.separator
-            table_file.write(temp+ "\n")
+            table_file.write(temp[:-3]+ "\n")
             table_file.close()
         except:
             pass
@@ -57,13 +63,14 @@ class transaction_mngr:
     def commit(self):
         for tuple in self.reserved_tables:
             self.merge(tuple[0], tuple[1])
-            self.unlock(tuple)
+            self.unlock(tuple[0], tuple[1])
         self.reserved_tables.clear()
     #aborts all current operations in the transaction
     def abort(self):
         for tuple in self.reserved_tables:
             self.unlock(tuple)
         self.reserved_tables.clear()
+        self.aborted = True
 
     #unlocks the desired table
     def unlock(self, database_name, table_name):
@@ -82,13 +89,13 @@ class transaction_mngr:
         lines = temp_table_file.readlines()
         #generate a list of tuples, that were modified, and a list of thier respective indexes in the table
         for line in lines:
-            token_list = line.split(transaction_mngr.separator)
+            token_list = line.rstrip().split(transaction_mngr.separator)
             list_of_indexes.append(int(token_list[0]))
             list_of_tuples.append(token_list[1:])
-
+            
         #*** no tpye conversion is performed, so it may need to be added ot fix buugs later
         for i in range(0, len(list_of_indexes)):
-            original_table[list_of_indexes[i]] = list_of_tuples[i]
+            original_table[int(list_of_indexes[i])] = list_of_tuples[i]
         
         #save updates to disk
         TB.save_table(database_name, table_name, original_table)
