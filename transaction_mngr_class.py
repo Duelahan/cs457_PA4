@@ -1,3 +1,10 @@
+#Author: Tristan Bailey
+#Date Created: 4/26/2022
+#Last Modified: 5/10/2022
+#Assignment: PA 4
+#Class: CS457
+#File: Class file for the transaction manager object: which manages database modify transactions
+
 import os
 import table_methods as TB
 
@@ -18,11 +25,13 @@ class transaction_mngr:
         else:
             return False
 
+    #checks if the transactionw as aborted
     def was_aborted(self):
         temp = self.aborted
         self.aborted = False
         return temp
 
+    #checks if transaction manager already manages the desired table
     def has_table(self, database_name, table_name):
         return ((database_name.lower(), table_name.lower()) in self.reserved_tables)
 
@@ -87,7 +96,7 @@ class transaction_mngr:
         list_of_indexes = []
         list_of_tuples = []
         lines = temp_table_file.readlines()
-        #generate a list of tuples, that were modified, and a list of thier respective indexes in the table
+        #generate a list of tuples, that were modified, and a list of their respective indexes in the table
         for line in lines:
             token_list = line.rstrip().split(transaction_mngr.separator)
             list_of_indexes.append(int(token_list[0]))
